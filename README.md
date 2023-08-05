@@ -1,4 +1,4 @@
-## keno_examples
+# keno_examples
 
 Contains the same application written in several languages performing a basic simulation to derive Keno odds based on the given payout table for multiple types of games.
 
