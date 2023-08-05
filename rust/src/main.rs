@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use rand::Rng;
 use once_cell::sync::Lazy;
 
+
 const ITERATIONS: i32 = 1000000;
 const PAYOUTS: Lazy<HashMap<i32, [i32; 11]>> = Lazy::new(|| 
 {     
