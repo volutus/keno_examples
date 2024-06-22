@@ -1,7 +1,7 @@
 use std::collections::HashMap;
-use std::collections::HashSet;
-use rand::Rng;
+use rand::seq::SliceRandom;
 use once_cell::sync::Lazy;
+use std::time::Instant;
 
 
 const ITERATIONS: i32 = 1000000;
@@ -24,15 +24,15 @@ const PAYOUTS: Lazy<HashMap<i32, [i32; 11]>> = Lazy::new(||
 
 fn main() 
 {
+    let start = Instant::now();
     for spot in 1..11 
     {
         let starting_balance = ITERATIONS;
         let mut current_balance = starting_balance;
         for _ in 0..ITERATIONS
         {
-            current_balance -= 1;
             let winnings = play(spot);
-            current_balance += winnings
+            current_balance = current_balance - 1 + winnings;
         }
         let gain_loss = current_balance - starting_balance;
 
@@ -43,22 +43,23 @@ fn main()
         GAIN/LOSS: {}", 
         spot, starting_balance, current_balance, gain_loss);
     }
+    let end = Instant::now();
+    println!("Finished in {} milliseconds", end.duration_since(start).as_millis());
 }
 
 fn play(spot: i32) -> i32
 {   
-    let mut player_numbers: HashSet<i32> = HashSet::new();
-    while player_numbers.len() < usize::try_from(spot).unwrap() {
-        let random_spot = rand::thread_rng().gen_range(1..81);
-        player_numbers.insert(random_spot);
-    }
-
-    let mut winning_numbers: HashSet<i32> = HashSet::new();
-    while winning_numbers.len() < 20 {
-        let random_spot = rand::thread_rng().gen_range(1..81);
-        winning_numbers.insert(random_spot);
-    }
-
-    let matches = player_numbers.intersection(&winning_numbers).count();
+    let player_numbers: Vec<usize> = fetch_random_numbers(spot);
+    let winning_numbers = fetch_random_numbers(20);
+    let matches = winning_numbers.iter().filter(|&&x| player_numbers.contains(&x)).count();
     return PAYOUTS[&spot][matches];
+}
+
+fn fetch_random_numbers(count: i32) -> Vec<usize>
+{
+    let index = count as usize;
+    let mut numbers: Vec<usize> = (0..80).collect();
+    numbers.shuffle(&mut rand::thread_rng());
+    let usable_numbers = numbers[0..index].to_vec();
+    return usable_numbers;
 }
